@@ -10,7 +10,7 @@ const PAI_FACULTATIVOS = 7;  // dias facultativos do pai (sempre a 100%)
 
 // 👉 Substitui pelo teu link de doação (PayPal.me / Stripe / Ko-fi / Buy Me a Coffee).
 // Com PayPal.me, o valor é acrescentado ao link: ex. https://www.paypal.com/paypalme/oteunome/5
-const DONATE_URL = "https://www.paypal.com/paypalme/oteunome";
+const DONATE_URL = "https://www.paypal.com/paypalme/jonymtfca";
 
 const MODALIDADES = [
   { id: "120", nome: "Inicial — 120 dias", partilhada: false, maeDias: 120, percent: 100 },
