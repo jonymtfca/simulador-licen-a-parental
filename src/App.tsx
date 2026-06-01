@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { Baby, CalendarDays, Info, ArrowRight, Heart, ChevronLeft, ChevronRight } from "lucide-react";
+import { Analytics } from "@vercel/analytics/react";
 
 /* ============================================================================
  * REGRAS (Portugal) — isoladas para fácil atualização
@@ -97,7 +98,7 @@ const CORES = {
 function Calendario({ r }) {
   const meses = useMemo(() => {
     const ini = new Date(r.birth.getFullYear(), r.birth.getMonth(), 1);
-    const out = []; let cur = new Date(ini);
+    const out = []; const cur = new Date(ini);
     while (cur <= r.fimGeral && out.length < 18) { out.push(new Date(cur)); cur.setMonth(cur.getMonth() + 1); }
     return out;
   }, [r]);
@@ -232,6 +233,7 @@ export default function App() {
   const vPaiTotal = (vPaiExcl || vPaiPart) ? (vPaiExcl?.total || 0) + (vPaiPart?.total || 0) : null;
 
   return (
+    <>
     <div className="app">
       <style>{CSS}</style>
 
@@ -374,6 +376,8 @@ export default function App() {
         </>
       )}
     </div>
+    <Analytics />
+    </>
   );
 }
 
