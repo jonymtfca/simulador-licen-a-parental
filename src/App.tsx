@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Baby, CalendarDays, Info, ArrowRight, Heart, ChevronLeft, ChevronRight, Copy, Check, Send } from "lucide-react";
 import { Analytics } from "@vercel/analytics/react";
 
@@ -164,24 +165,38 @@ function Calendario({ r }) {
  * ========================================================================== */
 function DatePicker({ value, onChange }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef(null);
+  const [pos, setPos] = useState({ top: 0, left: 0, width: 300 });
+  const triggerRef = useRef(null);
   const selected = parse(value);
   const [view, setView] = useState(() => {
     const base = selected || new Date(2026, 5, 1);
     return new Date(base.getFullYear(), base.getMonth(), 1);
   });
 
+  // posiciona o popover relativamente ao botão (recalcula em scroll/resize)
   useEffect(() => {
     if (!open) return;
-    const onDown = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    const reposition = () => {
+      const el = triggerRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const width = Math.min(320, window.innerWidth - 24);
+      let left = rect.left;
+      if (left + width > window.innerWidth - 12) left = window.innerWidth - 12 - width;
+      if (left < 12) left = 12;
+      setPos({ top: rect.bottom + 8, left, width });
+    };
+    reposition();
     const onKey = (e) => { if (e.key === "Escape") setOpen(false); };
-    document.addEventListener("pointerdown", onDown);
+    window.addEventListener("resize", reposition);
+    window.addEventListener("scroll", reposition, true);
     document.addEventListener("keydown", onKey);
-    return () => { document.removeEventListener("pointerdown", onDown); document.removeEventListener("keydown", onKey); };
+    return () => {
+      window.removeEventListener("resize", reposition);
+      window.removeEventListener("scroll", reposition, true);
+      document.removeEventListener("keydown", onKey);
+    };
   }, [open]);
-
-  // fecha sempre que uma data é escolhida (fiável também em telemóvel)
-  useEffect(() => { setOpen(false); }, [value]);
 
   const wd = ["S", "T", "Q", "Q", "S", "S", "D"];
   const y = view.getFullYear(), mo = view.getMonth();
@@ -192,34 +207,40 @@ function DatePicker({ value, onChange }) {
     ? selected.toLocaleDateString("pt-PT", { day: "2-digit", month: "long", year: "numeric" })
     : "Escolher data";
 
+  const escolher = (dt) => { onChange(key(dt)); setOpen(false); };
+
   return (
-    <div className="dp" ref={ref}>
-      <button type="button" className={`dp-trigger${selected ? "" : " empty"}`} onClick={() => setOpen((o) => !o)}>
+    <div className="dp">
+      <button ref={triggerRef} type="button" className={`dp-trigger${selected ? "" : " empty"}`} onClick={() => setOpen((o) => !o)}>
         <CalendarDays size={18} />
         <span>{label}</span>
       </button>
-      {open && (
-        <div className="dp-pop">
-          <div className="dp-head">
-            <button type="button" className="dp-nav" onClick={() => setView(new Date(y, mo - 1, 1))} aria-label="Mês anterior"><ChevronLeft size={18} /></button>
-            <span className="dp-month">{view.toLocaleDateString("pt-PT", { month: "long", year: "numeric" })}</span>
-            <button type="button" className="dp-nav" onClick={() => setView(new Date(y, mo + 1, 1))} aria-label="Mês seguinte"><ChevronRight size={18} /></button>
+      {open && createPortal(
+        <>
+          <div className="dp-backdrop" onPointerDown={() => setOpen(false)} />
+          <div className="dp-pop" style={{ position: "fixed", top: pos.top, left: pos.left, width: pos.width, zIndex: 1000 }}>
+            <div className="dp-head">
+              <button type="button" className="dp-nav" onClick={() => setView(new Date(y, mo - 1, 1))} aria-label="Mês anterior"><ChevronLeft size={18} /></button>
+              <span className="dp-month">{view.toLocaleDateString("pt-PT", { month: "long", year: "numeric" })}</span>
+              <button type="button" className="dp-nav" onClick={() => setView(new Date(y, mo + 1, 1))} aria-label="Mês seguinte"><ChevronRight size={18} /></button>
+            </div>
+            <div className="dp-wd">{wd.map((d, i) => <span key={i}>{d}</span>)}</div>
+            <div className="dp-grid">
+              {dias.map((dt, idx) => {
+                const isSel = selected && key(dt) === key(selected);
+                const style = idx === 0 ? { gridColumnStart: offset + 1 } : undefined;
+                return (
+                  <button type="button" key={idx} style={style}
+                    className={`dp-day${isSel ? " sel" : ""}`}
+                    onClick={() => escolher(dt)}>
+                    {dt.getDate()}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-          <div className="dp-wd">{wd.map((d, i) => <span key={i}>{d}</span>)}</div>
-          <div className="dp-grid">
-            {dias.map((dt, idx) => {
-              const isSel = selected && key(dt) === key(selected);
-              const style = idx === 0 ? { gridColumnStart: offset + 1 } : undefined;
-              return (
-                <button type="button" key={idx} style={style}
-                  className={`dp-day${isSel ? " sel" : ""}`}
-                  onClick={() => { onChange(key(dt)); setOpen(false); }}>
-                  {dt.getDate()}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        </>,
+        document.body
       )}
     </div>
   );
@@ -340,7 +361,7 @@ function ContactSection() {
   return (
     <section className="contact">
       <div className="contact-head">Tens uma sugestão?</div>
-      <p>Ideias, melhorias ou erros que encontraste — manda. Leio tudo.</p>
+      <p>Encontraste um erro ou tens uma ideia para melhorar a ferramenta? Escreve abaixo — cada sugestão ajuda a tornar isto mais útil para toda a gente.</p>
       <div className="cf">
         <div className="cf-grid">
           <input className="cf-input" placeholder="Nome" value={nome} onChange={(e) => setNome(e.target.value)} />
@@ -350,7 +371,7 @@ function ContactSection() {
         <button type="button" className="cf-btn" onClick={enviar} disabled={!valido || estado === "sending"}>
           {estado === "sending" ? "A enviar…" : <><Send size={16} /> Enviar sugestão</>}
         </button>
-        {estado === "ok" && <div className="cf-msg ok"><Check size={15} /> Obrigado! Recebi a tua mensagem.</div>}
+        {estado === "ok" && <div className="cf-msg ok"><Check size={15} /> Mensagem enviada. Obrigado pelo contributo!</div>}
         {estado === "error" && <div className="cf-msg err">Algo correu mal. Tenta de novo ou escreve-me no LinkedIn.</div>}
       </div>
     </section>
@@ -367,7 +388,7 @@ function Footer() {
         LinkedIn
       </a>
       <span className="ftr-meta">minhalicenca.pt · feito com 💙 · {new Date().getFullYear()}</span>
-      <span className="ftr-disc">Simulação informativa para planeamento. Não substitui o aconselhamento oficial da Segurança Social.</span>
+      <span className="ftr-disc">Esta ferramenta é informativa e pode conter erros. Confirma sempre os valores junto da Segurança Social — e se encontrares algo errado, avisa-me pelo formulário acima.</span>
     </footer>
   );
 }
@@ -539,7 +560,17 @@ export default function App() {
  * ========================================================================== */
 const CSS = `
 html{overflow-y:scroll;scrollbar-gutter:stable}
-body{margin:0;padding:0;display:block;background:#08080c}
+body{margin:0;padding:0;display:block;background:#08080c;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Segoe UI",system-ui,Roboto,sans-serif}
+/* variáveis globais (necessárias para o calendário que é renderizado via portal no body) */
+:root{
+  --bg:#08080c; --ink:#f5f5f7; --muted:rgba(235,235,245,.6);
+  --glass:rgba(24,24,28,.55); --glass2:rgba(44,44,50,.5);
+  --glass-brd:rgba(255,255,255,.10); --field:rgba(255,255,255,.06);
+  --accent:#0a84ff; --shadow:0 24px 60px -28px rgba(0,0,0,.7);
+  --mae:#ff6482; --mae-soft:rgba(255,100,130,.18);
+  --pai:#4aa3ff; --ambos:#c06bff;
+}
 #root{max-width:none;width:auto;margin:0;padding:0;text-align:left;display:block;place-items:initial}
 .app{
   --bg:#08080c; --ink:#f5f5f7; --muted:rgba(235,235,245,.6);
@@ -747,6 +778,7 @@ h1{font-size:33px;font-weight:700;margin:1px 0 0;letter-spacing:-.03em;line-heig
 
 /* date picker próprio */
 .dp{position:relative}
+.dp-backdrop{position:fixed;inset:0;z-index:999;background:transparent}
 .dp-trigger{width:100%;display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--glass-brd);
   border-radius:13px;background:var(--field);color:var(--ink);font:inherit;font-size:15px;font-weight:500;cursor:pointer;transition:.18s;line-height:1}
 .dp-trigger svg{color:var(--accent);flex:none;display:block}
