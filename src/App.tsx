@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
-import { Baby, CalendarDays, Info, ArrowRight, Heart, ChevronLeft, ChevronRight } from "lucide-react";
+import { Baby, CalendarDays, Info, ArrowRight, Heart, ChevronLeft, ChevronRight, Copy, Check } from "lucide-react";
 
 /* ============================================================================
  * REGRAS (Portugal) — isoladas para fácil atualização
@@ -8,9 +8,15 @@ import { Baby, CalendarDays, Info, ArrowRight, Heart, ChevronLeft, ChevronRight 
 const PAI_OBRIGATORIOS = 28; // dias obrigatórios do pai (sempre a 100%)
 const PAI_FACULTATIVOS = 7;  // dias facultativos do pai (sempre a 100%)
 
-// 👉 Substitui pelo teu link de doação (PayPal.me / Stripe / Ko-fi / Buy Me a Coffee).
-// Com PayPal.me, o valor é acrescentado ao link: ex. https://www.paypal.com/paypalme/oteunome/5
-const DONATE_URL = "https://www.paypal.com/paypalme/oteunome";
+// 👉 SUBSTITUI por TEUS dados de doação. Deixa em branco ("") qualquer método que não queiras mostrar.
+//    PayPal/Revolut usam links públicos (o valor é acrescentado ao link) — não expõem telefone nem IBAN.
+//    Para reativar MB WAY ou IBAN, basta pôr o número/IBAN nas linhas abaixo.
+const DONATE = {
+  mbway: "",                                          // (desativado) número de telemóvel MB WAY
+  paypal: "https://www.paypal.com/paypalme/jonymtfca", // PayPal.me
+  revolut: "https://revolut.me/joodrns",             // Revolut.me
+  iban: "",                                           // (desativado) IBAN
+};
 
 const MODALIDADES = [
   { id: "120", nome: "Licença parental inicial — 120 dias", partilhada: false, maeDias: 120, percent: 100 },
@@ -212,6 +218,84 @@ function DatePicker({ value, onChange }) {
 }
 
 /* ============================================================================
+ * DOAÇÃO — vários métodos (MB WAY, PayPal, Revolut, IBAN)
+ * ========================================================================== */
+function CopyRow({ label, value, hint }) {
+  const [copied, setCopied] = useState(false);
+  const copiar = async () => {
+    try {
+      await navigator.clipboard.writeText(value);
+    } catch {
+      const t = document.createElement("textarea");
+      t.value = value; document.body.appendChild(t); t.select();
+      try { document.execCommand("copy"); } catch (e) {}
+      document.body.removeChild(t);
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
+  };
+  return (
+    <>
+      <div className="copy-row">
+        <div className="copy-val">
+          <span className="copy-label">{label}</span>
+          <span className="copy-num">{value}</span>
+        </div>
+        <button type="button" className="copy-btn" onClick={copiar}>
+          {copied ? <><Check size={15} /> Copiado</> : <><Copy size={15} /> Copiar</>}
+        </button>
+      </div>
+      {hint && <span className="donate-hint">{hint}</span>}
+    </>
+  );
+}
+
+function AmountChips({ base, build }) {
+  return (
+    <div className="donate-chips">
+      {[2, 5, 10].map((a) => (
+        <a key={a} className="chip" href={build(a)} target="_blank" rel="noopener noreferrer">{a} €</a>
+      ))}
+      <a className="chip ghost" href={base} target="_blank" rel="noopener noreferrer">Outro valor</a>
+    </div>
+  );
+}
+
+function DonateSection() {
+  const tabs = [
+    DONATE.mbway && ["mbway", "MB WAY"],
+    DONATE.paypal && ["paypal", "PayPal"],
+    DONATE.revolut && ["revolut", "Revolut"],
+    DONATE.iban && ["iban", "IBAN"],
+  ].filter(Boolean);
+  const [metodo, setMetodo] = useState(tabs[0] ? tabs[0][0] : "");
+  if (!tabs.length) return null;
+
+  return (
+    <section className="donate rise">
+      <div className="donate-orb" />
+      <div className="donate-head"><span className="donate-heart"><Heart size={16} fill="currentColor" /></span> Ajuda a manter o site online</div>
+      <p>Este simulador é gratuito e sem publicidade. Se te foi útil, um pequeno gesto ajuda a pagar o alojamento e a mantê-lo a crescer.</p>
+
+      <div className="seg">
+        {tabs.map(([id, label]) => (
+          <button key={id} type="button" className={`seg-btn${metodo === id ? " on" : ""}`} onClick={() => setMetodo(id)}>{label}</button>
+        ))}
+      </div>
+
+      <div className="donate-body">
+        {metodo === "mbway" && <CopyRow label="Número MB WAY" value={DONATE.mbway} hint="Na app MB WAY: Enviar dinheiro → introduz este número e o valor que quiseres." />}
+        {metodo === "iban" && <CopyRow label="IBAN" value={DONATE.iban} hint="Transferência bancária para este IBAN. Obrigado!" />}
+        {metodo === "paypal" && <AmountChips base={DONATE.paypal} build={(a) => `${DONATE.paypal}/${a}`} />}
+        {metodo === "revolut" && <AmountChips base={DONATE.revolut} build={(a) => `${DONATE.revolut}/${a}eur`} />}
+      </div>
+
+      <span className="donate-foot">Obrigado pelo apoio 💙</span>
+    </section>
+  );
+}
+
+/* ============================================================================
  * APP
  * ========================================================================== */
 export default function App() {
@@ -245,18 +329,7 @@ export default function App() {
         <p>Planeia os dias e o que vais receber</p>
       </header>
 
-      <section className="donate rise">
-        <div className="donate-orb" />
-        <div className="donate-head"><span className="donate-heart"><Heart size={16} fill="currentColor" /></span> Ajuda a manter o site online</div>
-        <p>Este simulador é gratuito e sem publicidade. Se te foi útil, um pequeno gesto ajuda a pagar o alojamento e a mantê-lo a crescer.</p>
-        <div className="donate-chips">
-          {[2, 5, 10].map((a) => (
-            <a key={a} className="chip" href={`${DONATE_URL}/${a}`} target="_blank" rel="noopener noreferrer">{a} €</a>
-          ))}
-          <a className="chip ghost" href={DONATE_URL} target="_blank" rel="noopener noreferrer">Outro valor</a>
-        </div>
-        <span className="donate-foot">Pagamento seguro · obrigado pelo apoio 💙</span>
-      </section>
+      <DonateSection />
 
       <div className="controls rise">
         <label className="ctl">
@@ -527,6 +600,25 @@ h1{font-size:33px;font-weight:700;margin:1px 0 0;letter-spacing:-.03em;line-heig
 .chip.ghost{font-weight:600;font-size:14.5px;color:var(--muted)}
 .chip.ghost:hover{color:#fff}
 .donate-foot{position:relative;display:block;margin-top:18px;font-size:12px;color:var(--muted)}
+
+/* seletor de método de doação */
+.seg{position:relative;display:inline-flex;flex-wrap:wrap;justify-content:center;gap:3px;margin:18px auto 0;
+  padding:4px;border-radius:15px;background:var(--field);border:1px solid var(--glass-brd)}
+.seg-btn{border:none;background:transparent;color:var(--muted);font:inherit;font-size:13.5px;font-weight:600;
+  padding:9px 17px;border-radius:11px;cursor:pointer;transition:.2s cubic-bezier(.22,1,.36,1);letter-spacing:-.01em}
+.seg-btn:hover{color:var(--ink)}
+.seg-btn.on{color:#fff;background:linear-gradient(135deg,var(--mae),var(--ambos));box-shadow:0 8px 20px -10px var(--ambos)}
+
+.donate-body{position:relative;margin-top:20px;display:flex;flex-direction:column;align-items:center;gap:12px;min-height:64px;justify-content:center}
+.copy-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center}
+.copy-val{display:flex;flex-direction:column;align-items:flex-start;text-align:left}
+.copy-label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.copy-num{font-size:22px;font-weight:700;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.copy-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--glass-brd);background:var(--field);
+  color:var(--ink);font:inherit;font-size:14px;font-weight:600;padding:11px 18px;border-radius:13px;cursor:pointer;transition:.22s cubic-bezier(.22,1,.36,1)}
+.copy-btn:hover{border-color:transparent;color:#fff;transform:translateY(-2px);background:linear-gradient(135deg,var(--mae),var(--ambos));box-shadow:0 14px 30px -12px var(--ambos)}
+.copy-btn svg{flex:none}
+.donate-hint{position:relative;font-size:12px;color:var(--muted);max-width:380px;line-height:1.5}
 
 /* cabeçalho centrado */
 .hdr{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;margin:6px 0 18px}
