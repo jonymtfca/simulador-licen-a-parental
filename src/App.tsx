@@ -13,8 +13,8 @@ const PAI_FACULTATIVOS = 7;  // dias facultativos do pai (sempre a 100%)
 //    Para reativar MB WAY ou IBAN, basta pôr o número/IBAN nas linhas abaixo.
 const DONATE = {
   mbway: "",                                          // (desativado) número de telemóvel MB WAY
-  paypal: "https://www.paypal.com/paypalme/oteunome", // PayPal.me
-  revolut: "https://revolut.me/oteunome",             // Revolut.me
+  paypal: "https://www.paypal.com/paypalme/jonymtfca", // PayPal.me
+  revolut: "https://revolut.me/joordns",             // Revolut.me
   iban: "",                                           // (desativado) IBAN
 };
 
