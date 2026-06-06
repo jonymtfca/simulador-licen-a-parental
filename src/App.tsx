@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { Baby, CalendarDays, Info, ArrowRight, Heart, ChevronLeft, ChevronRight, Copy, Check, Send } from "lucide-react";
+import { Analytics } from "@vercel/analytics/react";
 
 /* ============================================================================
  * REGRAS (Portugal) — isoladas para fácil atualização
@@ -528,6 +529,7 @@ export default function App() {
 
       <ContactSection />
       <Footer />
+      <Analytics />
     </div>
   );
 }
