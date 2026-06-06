@@ -578,4 +578,28 @@ h1{font-size:33px;font-weight:700;margin:1px 0 0;letter-spacing:-.03em;line-heig
 .cards.rise{animation-delay:.33s}
 .calwrap.rise{animation-delay:.40s}
 @media(prefers-reduced-motion:reduce){.rise{animation:none;opacity:1}.app::before{animation:none}.donate-heart{animation:none}.dp-pop{animation:none}}
+
+/* robustez mobile — impede que inputs/cartões fiquem mais largos que o ecrã */
+body{overflow-x:hidden}
+.app{overflow-x:hidden}
+.controls,.cards,.pctbar,.ctl,.card,.pctmain,.stat{min-width:0}
+.ctl input,.ctl select,.dp-trigger{min-width:0;max-width:100%}
+.dp-trigger span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+@media(max-width:520px){
+  .app{padding:20px 16px 40px}
+  h1{font-size:30px}
+  .eyebrow{font-size:10.5px}
+  .controls{padding:18px;border-radius:20px;gap:14px}
+  .card{padding:18px;border-radius:20px}
+  .pctbar{padding:18px 4px;border-radius:20px}
+  .pctnum{font-size:32px}
+  .big{font-size:38px}
+  .valor{font-size:22px}
+  .donate{padding:28px 18px;border-radius:22px}
+  .donate-head{font-size:18px}
+  .donate p{font-size:13.5px}
+  .cal-grid{grid-template-columns:1fr}
+  .cal-month{padding:16px}
+}
 `;
