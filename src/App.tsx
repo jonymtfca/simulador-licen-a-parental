@@ -2,6 +2,7 @@ import React, { useState, useMemo, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Baby, CalendarDays, Info, ArrowRight, Heart, ChevronLeft, ChevronRight, Copy, Check, Send } from "lucide-react";
 import { Analytics } from "@vercel/analytics/react";
+import HCaptcha from "@hcaptcha/react-hcaptcha";
 
 /* ============================================================================
  * REGRAS (Portugal) — isoladas para fácil atualização
@@ -332,9 +333,11 @@ function ContactSection() {
   const [email, setEmail] = useState("");
   const [msg, setMsg] = useState("");
   const [estado, setEstado] = useState("idle"); // idle | sending | ok | error
+  const [captchaToken, setCaptchaToken] = useState("");
+  const captchaRef = useRef(null);
 
   const emailOk = /\S+@\S+\.\S+/.test(email);
-  const valido = nome.trim() && emailOk && msg.trim();
+  const valido = nome.trim() && emailOk && msg.trim() && captchaToken;
 
   const enviar = async () => {
     if (!valido || estado === "sending") return;
@@ -348,6 +351,7 @@ function ContactSection() {
           subject: "Nova sugestão — minhalicenca.pt",
           from_name: "minhalicenca.pt",
           name: nome, email, message: msg,
+          "h-captcha-response": captchaToken,
         }),
       });
       const data = await res.json();
@@ -355,6 +359,10 @@ function ContactSection() {
       else setEstado("error");
     } catch {
       setEstado("error");
+    } finally {
+      // o token do hCaptcha é de uso único — repõe sempre após uma tentativa
+      setCaptchaToken("");
+      captchaRef.current?.resetCaptcha?.();
     }
   };
 
@@ -368,6 +376,17 @@ function ContactSection() {
           <input className="cf-input" type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
         </div>
         <textarea className="cf-textarea" rows={4} placeholder="A tua mensagem…" value={msg} onChange={(e) => setMsg(e.target.value)} />
+        <div className="cf-captcha">
+          <HCaptcha
+            ref={captchaRef}
+            sitekey="50b2fe65-b00b-4b9e-ad62-3ba471098be2"
+            reCaptchaCompat={false}
+            theme="dark"
+            onVerify={(token) => setCaptchaToken(token)}
+            onExpire={() => setCaptchaToken("")}
+            onError={() => setCaptchaToken("")}
+          />
+        </div>
         <button type="button" className="cf-btn" onClick={enviar} disabled={!valido || estado === "sending"}>
           {estado === "sending" ? "A enviar…" : <><Send size={16} /> Enviar sugestão</>}
         </button>
@@ -749,6 +768,7 @@ h1{font-size:33px;font-weight:700;margin:1px 0 0;letter-spacing:-.03em;line-heig
 .cf-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 16px 34px -12px var(--ambos)}
 .cf-btn:disabled{opacity:.5;cursor:not-allowed}
 .cf-msg{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;padding:10px 14px;border-radius:11px}
+.cf-captcha{display:flex;justify-content:center;min-height:78px}
 .cf-msg.ok{color:#30d158;background:rgba(48,209,88,.12)}
 .cf-msg.err{color:var(--mae);background:var(--mae-soft)}
 
