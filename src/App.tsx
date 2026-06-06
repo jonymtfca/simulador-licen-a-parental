@@ -371,10 +371,9 @@ function ContactSection() {
       <div className="contact-head">Tens uma sugestão?</div>
       <p>Encontraste um erro ou tens uma ideia para melhorar a ferramenta? Escreve abaixo — cada sugestão ajuda a tornar isto mais útil para toda a gente.</p>
       <div className="cf">
-        <div className="cf-grid">
-          <input className="cf-input" placeholder="Nome" value={nome} onChange={(e) => setNome(e.target.value)} />
-          <input className="cf-input" type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-        </div>
+        <input className="cf-input" placeholder="O teu nome" value={nome} onChange={(e) => setNome(e.target.value)} />
+        <input className="cf-input" type="email" inputMode="email" placeholder="O teu email (ex.: nome@email.com)" value={email} onChange={(e) => setEmail(e.target.value)} />
+        {email.trim() && !emailOk && <span className="cf-hint">Introduz um email válido para poderes enviar.</span>}
         <textarea className="cf-textarea" rows={4} placeholder="A tua mensagem…" value={msg} onChange={(e) => setMsg(e.target.value)} />
         <div className="cf-captcha">
           <HCaptcha
@@ -769,6 +768,7 @@ h1{font-size:33px;font-weight:700;margin:1px 0 0;letter-spacing:-.03em;line-heig
 .cf-btn:disabled{opacity:.5;cursor:not-allowed}
 .cf-msg{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;padding:10px 14px;border-radius:11px}
 .cf-captcha{display:flex;justify-content:center;min-height:78px}
+.cf-hint{font-size:12px;color:var(--mae);margin-top:-4px;font-weight:600}
 .cf-msg.ok{color:#30d158;background:rgba(48,209,88,.12)}
 .cf-msg.err{color:var(--mae);background:var(--mae-soft)}
 
