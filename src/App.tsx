@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
-import { Baby, CalendarDays, Info, ArrowRight, Heart, ChevronLeft, ChevronRight, Copy, Check } from "lucide-react";
+import { Baby, CalendarDays, Info, ArrowRight, Heart, ChevronLeft, ChevronRight, Copy, Check, Linkedin, Send } from "lucide-react";
 
 /* ============================================================================
  * REGRAS (Portugal) — isoladas para fácil atualização
@@ -13,10 +13,17 @@ const PAI_FACULTATIVOS = 7;  // dias facultativos do pai (sempre a 100%)
 //    Para reativar MB WAY ou IBAN, basta pôr o número/IBAN nas linhas abaixo.
 const DONATE = {
   mbway: "",                                          // (desativado) número de telemóvel MB WAY
-  paypal: "https://www.paypal.com/paypalme/jonymtfca", // PayPal.me
-  revolut: "https://revolut.me/joodrns",             // Revolut.me
+  paypal: "https://www.paypal.com/paypalme/oteunome", // PayPal.me
+  revolut: "https://revolut.me/oteunome",             // Revolut.me
   iban: "",                                           // (desativado) IBAN
 };
+
+// 👉 Formulário de contacto: cria uma "Access Key" grátis em https://web3forms.com
+//    (mete o teu email lá; as sugestões chegam-te a esse email). Cola a chave aqui:
+const WEB3FORMS_KEY = "2b1d9895-efc4-463b-8075-976b89ac0b73";
+
+// 👉 O teu perfil de LinkedIn:
+const LINKEDIN_URL = "https://www.linkedin.com/in/jonyr/";
 
 const MODALIDADES = [
   { id: "120", nome: "Licença parental inicial — 120 dias", partilhada: false, maeDias: 120, percent: 100 },
@@ -296,6 +303,72 @@ function DonateSection() {
 }
 
 /* ============================================================================
+ * CONTACTO (Web3Forms — envia para o teu email, sem backend)
+ * ========================================================================== */
+function ContactSection() {
+  const [nome, setNome] = useState("");
+  const [email, setEmail] = useState("");
+  const [msg, setMsg] = useState("");
+  const [estado, setEstado] = useState("idle"); // idle | sending | ok | error
+
+  const emailOk = /\S+@\S+\.\S+/.test(email);
+  const valido = nome.trim() && emailOk && msg.trim();
+
+  const enviar = async () => {
+    if (!valido || estado === "sending") return;
+    setEstado("sending");
+    try {
+      const res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          access_key: WEB3FORMS_KEY,
+          subject: "Nova sugestão — minhalicenca.pt",
+          from_name: "minhalicenca.pt",
+          name: nome, email, message: msg,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) { setEstado("ok"); setNome(""); setEmail(""); setMsg(""); }
+      else setEstado("error");
+    } catch {
+      setEstado("error");
+    }
+  };
+
+  return (
+    <section className="contact">
+      <div className="contact-head">Tens uma sugestão?</div>
+      <p>Ideias, melhorias ou erros que encontraste — manda. Leio tudo.</p>
+      <div className="cf">
+        <div className="cf-grid">
+          <input className="cf-input" placeholder="Nome" value={nome} onChange={(e) => setNome(e.target.value)} />
+          <input className="cf-input" type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        </div>
+        <textarea className="cf-textarea" rows={4} placeholder="A tua mensagem…" value={msg} onChange={(e) => setMsg(e.target.value)} />
+        <button type="button" className="cf-btn" onClick={enviar} disabled={!valido || estado === "sending"}>
+          {estado === "sending" ? "A enviar…" : <><Send size={16} /> Enviar sugestão</>}
+        </button>
+        {estado === "ok" && <div className="cf-msg ok"><Check size={15} /> Obrigado! Recebi a tua mensagem.</div>}
+        {estado === "error" && <div className="cf-msg err">Algo correu mal. Tenta de novo ou escreve-me no LinkedIn.</div>}
+      </div>
+    </section>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="ftr">
+      <a className="ftr-link" href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer">
+        <Linkedin size={18} /> LinkedIn
+      </a>
+      <span className="ftr-meta">minhalicenca.pt · feito com 💙 · {new Date().getFullYear()}</span>
+      <span className="ftr-disc">Simulação informativa para planeamento. Não substitui o aconselhamento oficial da Segurança Social.</span>
+    </footer>
+  );
+}
+
+/* ============================================================================
  * APP
  * ========================================================================== */
 export default function App() {
@@ -449,6 +522,9 @@ export default function App() {
           <div className="rise calwrap"><Calendario r={r} /></div>
         </>
       )}
+
+      <ContactSection />
+      <Footer />
     </div>
   );
 }
@@ -620,6 +696,35 @@ h1{font-size:33px;font-weight:700;margin:1px 0 0;letter-spacing:-.03em;line-heig
 .copy-btn svg{flex:none}
 .donate-hint{position:relative;font-size:12px;color:var(--muted);max-width:380px;line-height:1.5}
 
+/* contacto */
+.contact{background:var(--glass);-webkit-backdrop-filter:blur(34px) saturate(180%);backdrop-filter:blur(34px) saturate(180%);
+  border:1px solid var(--glass-brd);box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.08);
+  border-radius:24px;padding:24px;margin-top:18px;text-align:center}
+.contact-head{font-size:21px;font-weight:700;letter-spacing:-.025em}
+.contact p{color:var(--muted);font-size:14px;margin:8px auto 18px;max-width:420px;line-height:1.55}
+.cf{display:flex;flex-direction:column;gap:11px;max-width:520px;margin:0 auto;text-align:left}
+.cf-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.cf-input,.cf-textarea{width:100%;min-width:0;padding:12px 14px;border:1px solid var(--glass-brd);border-radius:13px;
+  background:var(--field);color:var(--ink);font:inherit;font-size:15px;font-weight:500;transition:.18s;resize:vertical}
+.cf-input:focus,.cf-textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 22%,transparent)}
+.cf-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:13px;padding:13px 20px;
+  font:inherit;font-size:15px;font-weight:600;color:#fff;cursor:pointer;transition:.22s cubic-bezier(.22,1,.36,1);
+  background:linear-gradient(135deg,var(--mae),var(--ambos))}
+.cf-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 16px 34px -12px var(--ambos)}
+.cf-btn:disabled{opacity:.5;cursor:not-allowed}
+.cf-msg{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;padding:10px 14px;border-radius:11px}
+.cf-msg.ok{color:#30d158;background:rgba(48,209,88,.12)}
+.cf-msg.err{color:var(--mae);background:var(--mae-soft)}
+
+/* footer */
+.ftr{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;
+  margin-top:24px;padding:24px 16px 8px;border-top:1px solid var(--glass-brd)}
+.ftr-link{display:inline-flex;align-items:center;gap:8px;color:var(--ink);text-decoration:none;font-weight:600;font-size:14px;
+  padding:9px 16px;border:1px solid var(--glass-brd);border-radius:12px;background:var(--glass);transition:.2s}
+.ftr-link:hover{color:#fff;border-color:transparent;transform:translateY(-2px);background:linear-gradient(135deg,var(--pai),var(--ambos));box-shadow:0 12px 28px -12px var(--pai)}
+.ftr-meta{font-size:12.5px;color:var(--muted)}
+.ftr-disc{font-size:11.5px;color:var(--muted);max-width:460px;line-height:1.5;opacity:.85}
+
 /* cabeçalho centrado */
 .hdr{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;margin:6px 0 18px}
 .hdr .logo{width:60px;height:60px;border-radius:19px;margin-bottom:12px}
@@ -693,5 +798,8 @@ body{overflow-x:hidden}
   .donate p{font-size:13.5px}
   .cal-grid{grid-template-columns:1fr}
   .cal-month{padding:16px}
+  .cf-grid{grid-template-columns:1fr}
+  .contact{padding:20px;border-radius:20px}
+  .contact-head{font-size:18px}
 }
 `;
