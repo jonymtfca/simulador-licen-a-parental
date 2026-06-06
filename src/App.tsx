@@ -10,14 +10,14 @@ const PAI_FACULTATIVOS = 7;  // dias facultativos do pai (sempre a 100%)
 
 // 👉 Substitui pelo teu link de doação (PayPal.me / Stripe / Ko-fi / Buy Me a Coffee).
 // Com PayPal.me, o valor é acrescentado ao link: ex. https://www.paypal.com/paypalme/oteunome/5
-const DONATE_URL = "https://www.paypal.com/paypalme/jonymtfca";
+const DONATE_URL = "https://www.paypal.com/paypalme/oteunome";
 
 const MODALIDADES = [
-  { id: "120", nome: "Inicial — 120 dias", partilhada: false, maeDias: 120, percent: 100 },
-  { id: "150", nome: "Inicial — 150 dias", partilhada: false, maeDias: 150, percent: 80 },
-  { id: "p150", nome: "Partilhada — 120 + 30 (150 dias)", partilhada: true, pool: 150, paiMin: 30, percent: 100 },
-  { id: "p180", nome: "Partilhada — 150 + 30 (180 dias)", partilhada: true, pool: 180, paiMin: 30, percent: 83 },
-  { id: "p180b", nome: "Partilhada — 180 dias · pai 60 dias", partilhada: true, pool: 180, paiMin: 60, percent: 90 },
+  { id: "120", nome: "Licença parental inicial — 120 dias", partilhada: false, maeDias: 120, percent: 100 },
+  { id: "150", nome: "Licença parental inicial — 150 dias", partilhada: false, maeDias: 150, percent: 80 },
+  { id: "p150", nome: "Licença parental inicial partilhada — 150 dias (120 + 30)", partilhada: true, pool: 150, paiMin: 30, percent: 100 },
+  { id: "p180", nome: "Licença parental inicial partilhada — 180 dias (150 + 30)", partilhada: true, pool: 180, paiMin: 30, percent: 83 },
+  { id: "p180b", nome: "Licença parental inicial partilhada — 180 dias (pai 60 dias)", partilhada: true, pool: 180, paiMin: 60, percent: 90 },
 ];
 
 /* ============================================================================
@@ -161,10 +161,13 @@ function DatePicker({ value, onChange }) {
     if (!open) return;
     const onDown = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
     const onKey = (e) => { if (e.key === "Escape") setOpen(false); };
-    document.addEventListener("mousedown", onDown);
+    document.addEventListener("pointerdown", onDown);
     document.addEventListener("keydown", onKey);
-    return () => { document.removeEventListener("mousedown", onDown); document.removeEventListener("keydown", onKey); };
+    return () => { document.removeEventListener("pointerdown", onDown); document.removeEventListener("keydown", onKey); };
   }, [open]);
+
+  // fecha sempre que uma data é escolhida (fiável também em telemóvel)
+  useEffect(() => { setOpen(false); }, [value]);
 
   const wd = ["S", "T", "Q", "Q", "S", "S", "D"];
   const y = view.getFullYear(), mo = view.getMonth();
@@ -561,7 +564,7 @@ h1{font-size:33px;font-weight:700;margin:1px 0 0;letter-spacing:-.03em;line-heig
 .dp-wd span{text-align:center;font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase}
 .dp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
 .dp-day{aspect-ratio:1;border:none;background:transparent;color:var(--ink);border-radius:10px;font:inherit;
-  font-size:13.5px;font-weight:500;cursor:pointer;transition:.14s;display:flex;align-items:center;justify-content:center}
+  font-size:13.5px;font-weight:500;cursor:pointer;transition:.14s;display:flex;align-items:center;justify-content:center;touch-action:manipulation}
 .dp-day:hover{background:var(--field)}
 .dp-day.sel{background:var(--accent);color:#fff;font-weight:700;box-shadow:0 8px 18px -8px var(--accent)}
 
