@@ -65,20 +65,27 @@ function valorSubsidio(salarioMensal, pct, dias) {
 /* ============================================================================
  * MOTOR — blocos de ausência de cada progenitor
  * ========================================================================== */
-function calcular(dataNascimento, modId, paiFacultativo, paiPartilhaDias) {
+function calcular(dataNascimento, modId, paiFacultativo, paiPartilhaDias, bebes) {
   const birth = parse(dataNascimento);
   const mod = MODALIDADES.find((m) => m.id === modId);
   if (!birth || !mod) return null;
 
-  const paiExclDias = PAI_OBRIGATORIOS + (paiFacultativo ? PAI_FACULTATIVOS : 0);
+  // Gémeos/múltiplos: +30 dias na licença inicial e +2 dias na licença do pai, por cada bebé além do primeiro
+  const extra = Math.max(0, (Number(bebes) || 1) - 1);
+  const bonusInicial = 30 * extra;
+  const bonusPai = 2 * extra;
+
+  const paiExclDias = PAI_OBRIGATORIOS + (paiFacultativo ? PAI_FACULTATIVOS : 0) + bonusPai;
   const paiExcl = { tipo: "pai", inicio: birth, fim: addDays(birth, paiExclDias), dias: paiExclDias };
 
   let maeBloco, paiPartilha = null;
   if (!mod.partilhada) {
-    maeBloco = { tipo: "mae", inicio: birth, fim: addDays(birth, mod.maeDias), dias: mod.maeDias };
+    const maeDias = mod.maeDias + bonusInicial;
+    maeBloco = { tipo: "mae", inicio: birth, fim: addDays(birth, maeDias), dias: maeDias };
   } else {
-    const paiP = Math.max(mod.paiMin, Math.min(paiPartilhaDias || mod.paiMin, mod.pool - 42));
-    const maeDias = mod.pool - paiP;
+    const pool = mod.pool + bonusInicial;
+    const paiP = Math.max(mod.paiMin, Math.min(paiPartilhaDias || mod.paiMin, pool - 42));
+    const maeDias = pool - paiP;
     maeBloco = { tipo: "mae", inicio: birth, fim: addDays(birth, maeDias), dias: maeDias };
     paiPartilha = { tipo: "partilha", inicio: maeBloco.fim, fim: addDays(maeBloco.fim, paiP), dias: paiP };
   }
@@ -87,7 +94,7 @@ function calcular(dataNascimento, modId, paiFacultativo, paiPartilhaDias) {
   const regressoPai = paiPartilha ? paiPartilha.fim : paiExcl.fim;
   const fimGeral = new Date(Math.max(regressoMae, regressoPai));
 
-  return { birth, mod, maeBloco, paiExcl, paiPartilha, regressoMae, regressoPai, fimGeral, paiExclDias };
+  return { birth, mod, maeBloco, paiExcl, paiPartilha, regressoMae, regressoPai, fimGeral, paiExclDias, bebes: Number(bebes) || 1 };
 }
 
 function categoriaDia(dt, r) {
@@ -426,6 +433,7 @@ function InfoFAQ() {
     { q: "O que é a licença parental partilhada e quantos dias acrescenta?", a: "É quando a mãe e o pai dividem a licença inicial. Permite aumentar o total para 180 dias, desde que o pai goze um número mínimo de dias em exclusivo. Em troca, a percentagem do subsídio é mais elevada." },
     { q: "Quando começam a contar os dias de licença?", a: "A licença conta a partir do nascimento da criança. Os primeiros dias obrigatórios do pai são gozados logo após o nascimento e a licença da mãe inicia-se no parto." },
     { q: "Os dias de licença do pai são seguidos ou interpolados?", a: "Os primeiros 7 dias são gozados de forma seguida logo após o nascimento. Os restantes 21 dias obrigatórios podem ser gozados seguidos ou interpolados, dentro das 6 semanas seguintes ao nascimento." },
+    { q: "E em caso de gémeos?", a: "Por cada bebé além do primeiro, somam-se 30 dias à licença parental inicial e 2 dias à licença exclusiva do pai. Escolhe \"Gémeos\" ou \"Trigémeos\" no simulador e os dias são ajustados automaticamente." },
   ];
   return (
     <section className="info">
@@ -443,8 +451,16 @@ function InfoFAQ() {
           </details>
         ))}
       </div>
+
+      <div className="info-flag">
+        <b>Em discussão:</b> está a ser debatida no Parlamento uma proposta para alargar a licença parental inicial a 180 dias pagos a 100%. Foi aprovada apenas na generalidade (janeiro de 2026) e <b>ainda não é lei</b> — só deverá aplicar-se a partir de 2027, se for aprovada em definitivo. Em 2026 mantêm-se as regras atuais usadas neste simulador.
+      </div>
+
       <p className="info-note">
         Os dias e valores apresentados são uma estimativa informativa. Confirma sempre a tua situação concreta junto da Segurança Social.
+      </p>
+      <p className="info-sources">
+        Atualizado em junho de 2026 · Fontes: Segurança Social e gov.pt (Código do Trabalho e Decreto-Lei n.º 91/2009).
       </p>
     </section>
   );
@@ -458,13 +474,14 @@ export default function App() {
   const [modId, setModId] = useState("120");
   const [paiFacultativo, setPaiFac] = useState(true);
   const [paiPartilha, setPaiPartilha] = useState(30);
+  const [bebes, setBebes] = useState(1);
   const [salarioMae, setSalarioMae] = useState("");
   const [salarioPai, setSalarioPai] = useState("");
 
   const mod = MODALIDADES.find((m) => m.id === modId);
   const r = useMemo(
-    () => calcular(dataNascimento, modId, paiFacultativo, paiPartilha),
-    [dataNascimento, modId, paiFacultativo, paiPartilha]
+    () => calcular(dataNascimento, modId, paiFacultativo, paiPartilha, bebes),
+    [dataNascimento, modId, paiFacultativo, paiPartilha, bebes]
   );
 
   // Valores estimados do subsídio
@@ -504,6 +521,15 @@ export default function App() {
         </label>
 
         <label className="ctl">
+          <span>Número de bebés</span>
+          <select value={bebes} onChange={(e) => setBebes(Number(e.target.value))}>
+            <option value={1}>1 bebé</option>
+            <option value={2}>Gémeos (2)</option>
+            <option value={3}>Trigémeos (3)</option>
+          </select>
+        </label>
+
+        <label className="ctl">
           <span>Salário médio da mãe (bruto/mês)</span>
           <input type="number" min="0" placeholder="€ por mês" value={salarioMae} onChange={(e) => setSalarioMae(e.target.value)} />
         </label>
@@ -514,7 +540,7 @@ export default function App() {
         </label>
 
         <div className="ctl toggle-row">
-          <span>Pai goza os 7 dias facultativos (total {PAI_OBRIGATORIOS + PAI_FACULTATIVOS})</span>
+          <span>Pai goza os 7 dias facultativos (total {PAI_OBRIGATORIOS + PAI_FACULTATIVOS + 2 * Math.max(0, bebes - 1)})</span>
           <button type="button" role="switch" aria-checked={paiFacultativo}
             className={`switch${paiFacultativo ? " on" : ""}`} onClick={() => setPaiFac((v) => !v)}>
             <span className="knob" />
@@ -838,6 +864,10 @@ h1{font-size:33px;font-weight:700;margin:1px 0 0;letter-spacing:-.03em;line-heig
 .faq-item summary:hover{color:var(--accent)}
 .faq-item p{margin:0;padding:0 18px 16px;color:var(--muted);font-size:13.5px;line-height:1.6}
 .info-note{max-width:640px;margin:18px auto 0;text-align:center;font-size:12px;color:var(--muted);opacity:.85;line-height:1.5}
+.info-flag{max-width:680px;margin:20px auto 0;padding:14px 18px;border-radius:14px;font-size:13px;line-height:1.55;
+  color:var(--ink);background:color-mix(in srgb,var(--pai) 12%,transparent);border:1px solid color-mix(in srgb,var(--pai) 35%,transparent)}
+.info-flag b{font-weight:700}
+.info-sources{max-width:640px;margin:10px auto 0;text-align:center;font-size:11.5px;color:var(--muted);opacity:.7;line-height:1.5}
 
 /* cabeçalho centrado */
 .hdr{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;margin:6px 0 18px}
