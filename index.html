@@ -1,23 +1,93 @@
 <!doctype html>
-<html lang="pt">
+<html lang="pt-PT">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="theme-color" content="#08080c" />
-    <meta name="description" content="Simulador gratuito de licença parental em Portugal (2026). Calcula os dias de licença da mãe e do pai, a percentagem do salário e vê o calendário completo da ausência ao trabalho." />
 
-    <!-- Partilha em redes sociais -->
+    <!-- SEO principal (foco: DIAS de licença) -->
+    <title>Simulador de Licença Parental 2026: dias da mãe e do pai</title>
+    <meta name="description" content="Calcula quantos dias de licença parental tens direito — mãe e pai — e vê o calendário completo. Simulador gratuito, simples e sem registo para Portugal, 2026." />
+    <link rel="canonical" href="https://minhalicenca.pt/" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="author" content="João Rodrigues" />
+
+    <!-- Open Graph (partilha em redes sociais) -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Licença Parental · Simulador de dias e subsídio" />
-    <meta property="og:description" content="Planeia os dias de licença parental e o que vais receber. Gratuito e sem registo." />
+    <meta property="og:site_name" content="minhalicenca.pt" />
+    <meta property="og:title" content="Simulador de Licença Parental 2026: dias da mãe e do pai" />
+    <meta property="og:description" content="Quantos dias de licença parental tens direito? Calcula os dias da mãe e do pai e vê o calendário completo. Gratuito e sem registo." />
+    <meta property="og:url" content="https://minhalicenca.pt/" />
     <meta property="og:locale" content="pt_PT" />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:image" content="https://minhalicenca.pt/og-image.png" />
 
-    <title>Licença Parental · Simulador de dias e subsídio (Portugal 2026)</title>
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Simulador de Licença Parental 2026: dias da mãe e do pai" />
+    <meta name="twitter:description" content="Calcula os dias de licença parental da mãe e do pai e vê o calendário completo. Gratuito." />
+    <meta name="twitter:image" content="https://minhalicenca.pt/og-image.png" />
+
+    <!-- Dados estruturados: aplicação web -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Simulador de Licença Parental",
+      "url": "https://minhalicenca.pt/",
+      "description": "Simulador gratuito que calcula os dias de licença parental da mãe e do pai em Portugal e mostra o calendário completo da ausência ao trabalho.",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "All",
+      "inLanguage": "pt-PT",
+      "isAccessibleForFree": true,
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+    }
+    </script>
+
+    <!-- Dados estruturados: FAQ (pode aparecer em destaque no Google) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Quantos dias de licença parental tem a mãe?",
+          "acceptedAnswer": { "@type": "Answer", "text": "A licença parental inicial da mãe é de 120 ou 150 dias (cerca de 4 a 5 meses). Com a partilha entre mãe e pai, o período pode chegar a 180 dias. A escolha entre 120 e 150 dias altera a percentagem do salário recebida." }
+        },
+        {
+          "@type": "Question",
+          "name": "Quantos dias de licença tem o pai?",
+          "acceptedAnswer": { "@type": "Answer", "text": "O pai tem 28 dias obrigatórios mais 7 dias facultativos, num total de até 35 dias de licença exclusiva, pagos a 100%. Pode ainda gozar dias adicionais através da licença parental partilhada." }
+        },
+        {
+          "@type": "Question",
+          "name": "O que é a licença parental partilhada e quantos dias acrescenta?",
+          "acceptedAnswer": { "@type": "Answer", "text": "É quando a mãe e o pai dividem a licença inicial. Permite aumentar o total para 180 dias, desde que o pai goze um número mínimo de dias em exclusivo. Em troca, a percentagem do subsídio é mais elevada." }
+        },
+        {
+          "@type": "Question",
+          "name": "Quando começam a contar os dias de licença?",
+          "acceptedAnswer": { "@type": "Answer", "text": "A licença conta a partir do nascimento da criança. Os primeiros dias obrigatórios do pai são gozados logo após o nascimento e a licença da mãe inicia-se no parto." }
+        },
+        {
+          "@type": "Question",
+          "name": "Os dias de licença do pai são seguidos ou interpolados?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Os primeiros 7 dias são gozados de forma seguida logo após o nascimento. Os restantes 21 dias obrigatórios podem ser gozados seguidos ou interpolados, dentro das 6 semanas seguintes ao nascimento." }
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+
+    <!-- Conteúdo de recurso para quem (ou o que) não corre JavaScript -->
+    <noscript>
+      <h1>Simulador de Licença Parental em Portugal (2026)</h1>
+      <p>Calcula quantos dias de licença parental tens direito — para a mãe e para o pai — e vê o calendário completo da ausência ao trabalho. Ferramenta gratuita, simples e sem registo. Ativa o JavaScript para usar o simulador.</p>
+    </noscript>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -412,6 +412,40 @@ function Footer() {
 }
 
 /* ============================================================================
+ * CONTEÚDO + FAQ (SEO — foco nos dias de licença)
+ * ========================================================================== */
+function InfoFAQ() {
+  const faqs = [
+    { q: "Quantos dias de licença parental tem a mãe?", a: "A licença parental inicial da mãe é de 120 ou 150 dias (cerca de 4 a 5 meses). Com a partilha entre mãe e pai, o período pode chegar a 180 dias. A escolha entre 120 e 150 dias altera a percentagem do salário recebida." },
+    { q: "Quantos dias de licença tem o pai?", a: "O pai tem 28 dias obrigatórios mais 7 dias facultativos, num total de até 35 dias de licença exclusiva, pagos a 100%. Pode ainda gozar dias adicionais através da licença parental partilhada." },
+    { q: "O que é a licença parental partilhada e quantos dias acrescenta?", a: "É quando a mãe e o pai dividem a licença inicial. Permite aumentar o total para 180 dias, desde que o pai goze um número mínimo de dias em exclusivo. Em troca, a percentagem do subsídio é mais elevada." },
+    { q: "Quando começam a contar os dias de licença?", a: "A licença conta a partir do nascimento da criança. Os primeiros dias obrigatórios do pai são gozados logo após o nascimento e a licença da mãe inicia-se no parto." },
+    { q: "Os dias de licença do pai são seguidos ou interpolados?", a: "Os primeiros 7 dias são gozados de forma seguida logo após o nascimento. Os restantes 21 dias obrigatórios podem ser gozados seguidos ou interpolados, dentro das 6 semanas seguintes ao nascimento." },
+  ];
+  return (
+    <section className="info">
+      <h2 className="info-title">Como funciona a licença parental em dias</h2>
+      <p className="info-lead">
+        Este simulador mostra-te, de forma simples, <b>quantos dias de licença parental</b> tens direito —
+        para a <b>mãe</b> e para o <b>pai</b> — e desenha o <b>calendário</b> completo da ausência ao trabalho.
+        Escolhe a data de nascimento e a modalidade, e vês logo os dias de cada um, quem está em casa e quando regressas ao trabalho.
+      </p>
+      <div className="faq">
+        {faqs.map((f, i) => (
+          <details className="faq-item" key={i}>
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+      <p className="info-note">
+        Os dias e valores apresentados são uma estimativa informativa. Confirma sempre a tua situação concreta junto da Segurança Social.
+      </p>
+    </section>
+  );
+}
+
+/* ============================================================================
  * APP
  * ========================================================================== */
 export default function App() {
@@ -566,6 +600,7 @@ export default function App() {
         </>
       )}
 
+      <InfoFAQ />
       <ContactSection />
       <Footer />
       <Analytics />
@@ -781,6 +816,24 @@ h1{font-size:33px;font-weight:700;margin:1px 0 0;letter-spacing:-.03em;line-heig
 .ftr-meta{font-size:12.5px;color:var(--muted)}
 .ftr-disc{font-size:11.5px;color:var(--muted);max-width:460px;line-height:1.5;opacity:.85}
 
+/* conteúdo + FAQ */
+.info{background:var(--glass);-webkit-backdrop-filter:blur(34px) saturate(180%);backdrop-filter:blur(34px) saturate(180%);
+  border:1px solid var(--glass-brd);box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.08);
+  border-radius:24px;padding:26px;margin-top:18px}
+.info-title{font-size:21px;font-weight:700;letter-spacing:-.025em;margin:0 0 12px;text-align:center}
+.info-lead{color:var(--muted);font-size:14px;line-height:1.65;margin:0 auto 20px;max-width:640px;text-align:center}
+.info-lead b{color:var(--ink);font-weight:600}
+.faq{display:flex;flex-direction:column;gap:10px;max-width:680px;margin:0 auto}
+.faq-item{border:1px solid var(--glass-brd);border-radius:14px;background:var(--field);overflow:hidden}
+.faq-item summary{cursor:pointer;list-style:none;padding:15px 18px;font-size:14.5px;font-weight:600;letter-spacing:-.01em;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;transition:.18s}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:"+";font-size:21px;font-weight:300;color:var(--accent);transition:transform .2s;line-height:1}
+.faq-item[open] summary::after{transform:rotate(45deg)}
+.faq-item summary:hover{color:var(--accent)}
+.faq-item p{margin:0;padding:0 18px 16px;color:var(--muted);font-size:13.5px;line-height:1.6}
+.info-note{max-width:640px;margin:18px auto 0;text-align:center;font-size:12px;color:var(--muted);opacity:.85;line-height:1.5}
+
 /* cabeçalho centrado */
 .hdr{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;margin:6px 0 18px}
 .hdr .logo{width:60px;height:60px;border-radius:19px;margin-bottom:12px}
@@ -858,5 +911,7 @@ body{overflow-x:hidden}
   .cf-grid{grid-template-columns:1fr}
   .contact{padding:20px;border-radius:20px}
   .contact-head{font-size:18px}
+  .info{padding:20px;border-radius:20px}
+  .info-title{font-size:18px}
 }
 `;
