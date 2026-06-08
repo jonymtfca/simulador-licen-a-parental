@@ -17,7 +17,7 @@ const PAI_FACULTATIVOS = 7;  // dias facultativos do pai (sempre a 100%)
 const DONATE = {
   mbway: "",                                          // (desativado) número de telemóvel MB WAY
   paypal: "https://www.paypal.com/paypalme/jonymtfca", // PayPal.me
-  revolut: "https://revolut.me/joordns",             // Revolut.me
+  revolut: "https://revolut.me/joodrns",             // Revolut.me
   iban: "",                                           // (desativado) IBAN
 };
 
