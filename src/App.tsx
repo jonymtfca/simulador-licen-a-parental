@@ -604,10 +604,19 @@ export default function App() {
                   <span className="tag">{r.mod.percent}%</span> Partilhada · {fmt(r.paiPartilha.inicio)} <ArrowRight size={13} /> {fmt(addDays(r.paiPartilha.fim, -1))} ({r.paiPartilha.dias} dias)
                 </div>
               )}
-              {vPaiTotal != null && (() => {
-                const d = vPaiExcl?.diario ?? vPaiPart?.diario ?? 0;
-                return <div className="valor">{eur(vPaiTotal)} <small>no total · {eur2(d)}/dia · ≈ {eur(d * 30)}/mês</small></div>;
-              })()}
+              {vPaiTotal != null && (
+                <div className="valor">
+                  {eur(vPaiTotal)} <small>no total</small>
+                  {vPaiPart ? (
+                    <div className="valor-break">
+                      {vPaiExcl && <span>{r.paiExclDias} dias a 100% · {eur(vPaiExcl.total)} ({eur2(vPaiExcl.diario)}/dia)</span>}
+                      <span>{r.paiPartilha.dias} dias a {r.mod.percent}% · {eur(vPaiPart.total)} ({eur2(vPaiPart.diario)}/dia)</span>
+                    </div>
+                  ) : (
+                    vPaiExcl && <small>{eur2(vPaiExcl.diario)}/dia · ≈ {eur(vPaiExcl.diario * 30)}/mês</small>
+                  )}
+                </div>
+              )}
               <div className="back">Regressa ao trabalho · <b>{fmt(r.regressoPai)}</b></div>
             </div>
           </div>
@@ -755,6 +764,7 @@ h1{font-size:33px;font-weight:700;margin:1px 0 0;letter-spacing:-.03em;line-heig
 .pill{display:inline-block;font-size:12.5px;font-weight:600;padding:5px 12px;border-radius:99px;margin-top:12px}
 .valor{margin-top:14px;font-size:25px;font-weight:700;letter-spacing:-.025em}
 .valor small{display:block;font-size:12px;font-weight:500;color:var(--muted);letter-spacing:0;margin-top:3px}
+.valor-break{display:flex;flex-direction:column;gap:3px;margin-top:7px;font-size:12.5px;font-weight:500;color:var(--muted);letter-spacing:0;line-height:1.5}
 .period{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px;margin-top:10px;letter-spacing:-.01em;flex-wrap:wrap}
 .tag{font-size:11px;font-weight:700;color:#fff;background:var(--pai);border-radius:6px;padding:2px 7px}
 .back{font-size:13px;color:var(--muted);margin-top:14px;padding-top:14px;border-top:1px solid var(--glass-brd)}
