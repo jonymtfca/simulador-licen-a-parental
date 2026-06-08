@@ -317,7 +317,12 @@ function DonateSection() {
         {metodo === "mbway" && <CopyRow label="Número MB WAY" value={DONATE.mbway} hint="Na app MB WAY: Enviar dinheiro → introduz este número e o valor que quiseres." />}
         {metodo === "iban" && <CopyRow label="IBAN" value={DONATE.iban} hint="Transferência bancária para este IBAN. Obrigado!" />}
         {metodo === "paypal" && <AmountChips base={DONATE.paypal} build={(a) => `${DONATE.paypal}/${a}`} />}
-        {metodo === "revolut" && <AmountChips base={DONATE.revolut} build={(a) => `${DONATE.revolut}/${a}eur`} />}
+        {metodo === "revolut" && (
+          <>
+            <a className="chip" href={DONATE.revolut} target="_blank" rel="noopener noreferrer">Abrir Revolut</a>
+            <span className="donate-hint">Escolhes o valor na app do Revolut.</span>
+          </>
+        )}
       </div>
 
       <span className="donate-foot">Obrigado pelo apoio 💙</span>
