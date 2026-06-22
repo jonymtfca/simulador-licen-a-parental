@@ -498,7 +498,7 @@ export default function App() {
         <div className="logo"><Baby size={26} /></div>
         <span className="eyebrow">Portugal · 2026</span>
         <h1>Licença Parental</h1>
-        <p>Planeia os dias e o que vais receber</p>
+        <p>Descobre os dias de licença de cada um e organiza-os num calendário visual, sem complicações.</p>
       </header>
 
       <DonateSection />
